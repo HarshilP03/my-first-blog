@@ -5,7 +5,7 @@ from django.shortcuts import render, get_object_or_404
 from .forms import PostForm, CommentForm
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
-
+from newsapi import NewsApiClient 
 # Create your views here.
 
 def post_list(request):
@@ -15,6 +15,7 @@ def post_list(request):
 def post_detail(request, pk):
     post = get_object_or_404(Post, pk=pk)
     return render(request, 'blog/post_detail.html', {'post': post})
+
 @login_required
 def post_new(request):
     if request.method == "POST":
@@ -84,3 +85,22 @@ def comment_remove(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
     comment.delete()
     return redirect('post_detail', pk=comment.post.pk)
+
+def index(request): 
+      
+    newsapi = NewsApiClient(api_key = 'af69054c367341068b3d66924e52a232') 
+    top = newsapi.get_top_headlines(sources ='google-news-in') 
+  
+    l = top['articles'] 
+    desc =[] 
+    news =[] 
+    img =[] 
+  
+    for i in range(len(l)): 
+        f = l[i] 
+        news.append(f['title']) 
+        desc.append(f['description']) 
+        img.append(f['urlToImage']) 
+    mylist = zip(news, desc, img) 
+  
+    return render(request, 'blog/index.html', context ={"mylist":mylist})
